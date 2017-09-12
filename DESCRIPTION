@@ -1,11 +1,15 @@
 Package: writewidgets
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Write htmlwidgets without saving
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Authors@R: person("Jaehyeon", "Kim", email="dottami@gmail.com", role = c("aut", "cre"))
+Maintainer: Jaehyeon Kim <dottami@gmail.com>
+Description: This package aims to extend saveWidget function of the htmlwidgets package.
+License: MIT
+Imports:
+    htmltools (>= 0.3),
+    htmlwidgets (>= 0.9)
 Encoding: UTF-8
 LazyData: true
+Enhances: htmlwidgets (>= 0.9)
+RoxygenNote: 6.0.1
