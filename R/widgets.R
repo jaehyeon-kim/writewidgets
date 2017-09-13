@@ -1,45 +1,3 @@
-#' Convert R bool value into Python bool value as a string
-#'
-#' \code{convert_bool} converts a R bool value (TRUE or FALSE) into a Python bool value (True or False). This function is not exported.
-#'
-#' @param bool R bool value
-#' @return Python bool value as a string
-#' @export
-convert_bool <- function(bool) {
-    if(bool) 'True' else 'False'
-}
-
-
-# library(htmlwidgets)
-# library(DT)
-# library(highcharter)
-#
-# libs <- file.path(getwd(), 'lib')
-# selfcontained <- FALSE
-#
-# get_plot <- function(selfcontained = selfcontained, libdir = libs) {
-#     p <- hchart(mpg, "scatter", hcaes(x = displ, y = hwy, group = class))
-#     p$sizingPolicy$browser$padding <- 15
-#     p$sizingPolicy$browser$fill <- TRUE
-#     htmlwidgets::saveWidget(p, "plot.html", selfcontained, libdir)
-# }
-#
-#
-get_dt <- function(selfcontained = selfcontained, libdir = libs) {
-    ##dt <- datatable(iris, rownames = FALSE)
-    dt <- datatable(iris, extensions = 'Responsive', class = 'display compact', rownames = FALSE, options = list(
-        dom = 'lftip',
-        scrollY = 300,
-        scroller = TRUE,
-        pageLength = 10,
-        lengthMenu = c(10, 15, 20)
-    ))
-    dt$sizingPolicy$browser$padding <- 10
-    dt$sizingPolicy$browser$fill <- TRUE
-    htmlwidgets::saveWidget(dt, "table.html", selfcontained, libdir)
-}
-# c("Depends", "Imports", "LinkingTo")
-
 # > saveWidget
 # function (widget, file, selfcontained = TRUE, libdir = NULL,
 #           background = "white", knitrOptions = list())
@@ -71,7 +29,7 @@ write_widget <- function() {
     if (is.null(x)) y else x
 }
 
-`%+%` <- function(x, y) {
+`%-%` <- function(x, y) {
     paste(c(x, y), collapse = '-')
 }
 
@@ -86,6 +44,14 @@ get_default_sizes <- function() {
     )
 }
 
+#' Resolve widget sizing policy
+#'
+#' Figure out what width/height to use, taking a widget object and sizing policy.
+#'
+#' @param x A widget object whose size is to be determined.
+#' @param sp The sizing policy to use.
+#' @return A list that is guaranteed to have `width` and `height` values (number of CSS unit string).
+#' @export
 resolve_sizing <- function(x, sp) {
     default_sizes <- get_default_sizes()
     return(list(
@@ -108,17 +74,48 @@ resolve_sizing <- function(x, sp) {
     ))
 }
 
+#' Create widget id
+#'
+#' Create widget id if not exists.
+#'
+#' @param bytes number to sample
+#' @return An id string
 create_widget_id <- function(bytes = 10) {
-
-    as.integer(Sys.time()) %+% paste(format(as.hexmode(sample(256, bytes, replace = TRUE)-1), width=2), collapse = "")
+    as.integer(Sys.time()) %-%
+        paste(format(as.hexmode(sample(256, bytes, replace = TRUE)-1), width=2), collapse = "")
 }
 
+#' Widget to HTML
+#'
+#' Generate HTML from a htmlwidget.
+#'
+#' @param x A widget object
+#' @return HTML
+#' @export
 to_html <- function(x) {
     size_info <- resolve_sizing(x, x$sizingPolicy)
 
-    id <- x$elementId %||% 'htmlwidgets' %+% create_widget_id()
+    # set element id
+    x$id <- x$elementId %||% 'htmlwidgets' %-% create_widget_id()
 
-    id
+    # create a style attribute for the width and height
+    w <- validateCssUnit(size_info$width)
+    h <- validateCssUnit(size_info$height)
+    style <- paste('width:', w, ';', 'height', h, ';', sep = '')
+
+    container <- function(x) {
+        div(id='htmlwidget_container', x)
+    }
+
+    html <- tagList(
+        container(
+            tagList(
+                x$prepend
+            )
+        )
+    )
+
+    container(x)
 }
 
 # toHTML <- function(x, standalone = FALSE, knitrOptions = NULL) {
